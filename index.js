@@ -83,9 +83,18 @@ async function generateLinks() {
 
 generateLinks();
 
-// -------- SERVER --------
 app.get("/", (req, res) => {
   res.send("Server running");
+});
+
+app.get("/links", (req, res) => {
+  res.sendFile(process.cwd() + "/links.html");
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server started on port ${PORT}`);
 });
 
 const PORT = process.env.PORT || 3000;

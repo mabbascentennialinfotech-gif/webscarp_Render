@@ -11,6 +11,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "fs": "^0.0.1-security",
+    "mssql": "^12.5.2"
   }
 }

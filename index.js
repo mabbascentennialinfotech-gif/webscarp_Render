@@ -1,14 +1,19 @@
+import express from "express";
 import fs from "fs";
 import sql from "mssql";
-import dotenv from "dotenv"
-dotenv.config()
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const app = express();
 
 // -------- DB CONFIG --------
 const dbConfig = {
-  user: process.env.DB_user,
-  password: process.env.DB_password,
-  server: process.env.DB_server,
-  database: process.env.DB_database,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT),
   options: {
     encrypt: false,
     trustServerCertificate: true
@@ -17,20 +22,9 @@ const dbConfig = {
 
 // -------- COUNTRIES --------
 const countries = [
-  "india", "united-states", "united-kingdom", "australia", "germany", "france",
-  "singapore", "netherlands", "albania", "algeria", "antigua-and-barbuda",
-  "argentina", "armenia", "austria", "azerbaijan", "the-bahamas", "bahrain",
-  "belgium", "brazil", "cambodia", "cameroon", "canada",
-  "central-african-republic", "chile", "china", "colombia", "congo",
-  "costa-rica", "czech-republic", "denmark", "egypt", "finland", "greece",
-  "greenland", "italy--roma", "hong-kong-sar", "hungary", "iceland",
-  "indonesia", "iraq", "ireland", "israel", "italy", "jamaica", "japan",
-  "jersey", "jordan", "kenya", "south-korea", "mauritius", "mexico",
-  "nepal", "new-zealand", "nigeria", "norway", "pakistan", "philippines",
-  "poland", "portugal", "qatar", "russia", "saudi-arabia", "serbia",
-  "slovakia", "south-africa", "spain", "sri-lanka", "sweden", "switzerland",
-  "tanzania", "thailand", "turkey", "ukraine", "united-arab-emirates",
-  "uzbekistan", "venezuela", "vietnam", "zimbabwe"
+  "india",
+  "united-states",
+  "united-kingdom"
 ];
 
 // -------- GET SUBCATEGORY IDS --------
@@ -45,9 +39,11 @@ async function getSubcategoryIds(pool) {
 async function generateLinks() {
   try {
     console.log("🔌 Connecting to DB...");
+
     const pool = await sql.connect(dbConfig);
 
     const subcategories = await getSubcategoryIds(pool);
+
     console.log("✅ Subcategories loaded:", subcategories.length);
 
     let html = `
@@ -60,9 +56,11 @@ async function generateLinks() {
     `;
 
     for (let subId of subcategories) {
+
       html += `<h3>Subcategory: ${subId}</h3>`;
 
       for (let country of countries) {
+
         const url = `https://www.eventbrite.com/d/${country}/all-events/?subcategories=${subId}`;
 
         html += `<a href="${url}" target="_blank">${url}</a><br>`;
@@ -78,8 +76,20 @@ async function generateLinks() {
     await pool.close();
 
   } catch (err) {
+
     console.error("❌ Error:", err.message);
   }
 }
 
 generateLinks();
+
+// -------- SERVER --------
+app.get("/", (req, res) => {
+  res.send("Server running");
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server started on port ${PORT}`);
+});
